@@ -10764,7 +10764,7 @@ when an application performs repeated divisions by the same divisor.")
       (native-inputs
        (list python-wrapper))
       (inputs
-       (list psimd googletest googlebenchmark))
+       (list psimd googletest-1.8 googlebenchmark))
       (synopsis "C++ library for half-precision floating point formats")
       (description
        "This header-only C++ library implements conversion to and from
