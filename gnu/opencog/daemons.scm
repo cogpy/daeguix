@@ -57,7 +57,11 @@
 (define* (make-resource-monitor-daemon #:key
                                       (name "resource-monitor")
                                       (interval 10)
-                                      (thresholds '((cpu . 80) (memory . 90))))
+                                      (thresholds '((cpu . 80) (memory . 90)))
+                                      (cpu-baseline 20)
+                                      (cpu-variance 30)
+                                      (memory-baseline 30)
+                                      (memory-variance 40))
   "Create a daemon that monitors system resources and agent health."
   (make-daemon-internal
    name
@@ -66,18 +70,26 @@
    #f
    (make-mutex)
    (list (cons 'interval interval)
-         (cons 'thresholds thresholds))
+         (cons 'thresholds thresholds)
+         (cons 'cpu-baseline cpu-baseline)
+         (cons 'cpu-variance cpu-variance)
+         (cons 'memory-baseline memory-baseline)
+         (cons 'memory-variance memory-variance))
    (make-hash-table)))
 
 (define (resource-monitor-loop daemon)
   "Main loop for resource monitoring daemon."
   (let ((interval (assoc-ref (daemon-config daemon) 'interval))
-        (thresholds (assoc-ref (daemon-config daemon) 'thresholds)))
+        (thresholds (assoc-ref (daemon-config daemon) 'thresholds))
+        (cpu-baseline (assoc-ref (daemon-config daemon) 'cpu-baseline))
+        (cpu-variance (assoc-ref (daemon-config daemon) 'cpu-variance))
+        (mem-baseline (assoc-ref (daemon-config daemon) 'memory-baseline))
+        (mem-variance (assoc-ref (daemon-config daemon) 'memory-variance)))
     (let loop ()
       (when (eq? 'running (daemon-state daemon))
         ;; Collect resource metrics
-        (let* ((cpu-usage (get-cpu-usage))
-               (memory-usage (get-memory-usage))
+        (let* ((cpu-usage (get-cpu-usage cpu-baseline cpu-variance))
+               (memory-usage (get-memory-usage mem-baseline mem-variance))
                (agent-count (get-agent-count))
                (timestamp (current-time time-monotonic)))
           
@@ -103,15 +115,15 @@
         (sleep interval)
         (loop)))))
 
-(define (get-cpu-usage)
+(define* (get-cpu-usage #:optional (baseline 20) (variance 30))
   "Get current CPU usage percentage."
   ;; Simplified - would read from /proc/stat in production
-  (+ 20 (random 30)))
+  (+ baseline (random variance)))
 
-(define (get-memory-usage)
+(define* (get-memory-usage #:optional (baseline 30) (variance 40))
   "Get current memory usage percentage."
   ;; Simplified - would read from /proc/meminfo in production
-  (+ 30 (random 40)))
+  (+ baseline (random variance)))
 
 (define (get-agent-count)
   "Get count of running agents."

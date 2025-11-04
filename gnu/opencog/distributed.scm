@@ -105,7 +105,8 @@
 (define (coordinator-send-message coordinator source dest msg-type payload)
   "Send a message to a specific node."
   (with-mutex (coordinator-mutex coordinator)
-    (let ((msg (make-message source dest msg-type payload (current-time))))
+    (let ((msg (make-message source dest msg-type payload
+                            (time-second (current-time time-monotonic)))))
       (format #t "[distributed] Message ~a: ~a -> ~a~%" msg-type source dest)
       ;; In a full implementation, this would handle actual network transmission
       ;; For now, we log the message
@@ -197,9 +198,9 @@
 (define (sync-atomspace-delta coordinator source-node atoms)
   "Synchronize AtomSpace changes across distributed nodes."
   (coordinator-broadcast coordinator source-node 'atomspace-sync
-                        (list 'delta atoms (current-time))))
+                        (list 'delta atoms (time-second (current-time time-monotonic)))))
 
 (define (replicate-atomspace coordinator source target)
   "Replicate entire AtomSpace from source to target node."
   (coordinator-send-message coordinator source target 'atomspace-replicate
-                          (list 'full-sync (current-time))))
+                          (list 'full-sync (time-second (current-time time-monotonic)))))

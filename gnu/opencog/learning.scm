@@ -73,7 +73,8 @@
   (with-mutex (miner-mutex miner)
     ;; Simplified pattern mining algorithm
     ;; In production, this would use sophisticated algorithms like FP-growth or MOSES
-    (let ((candidate-patterns '()))
+    (let ((candidate-patterns '())
+          (discovery-time (time-second (current-time time-monotonic))))
       (format #t "[learning] Mining patterns with min-support: ~a~%"
               (miner-min-support miner))
       ;; Extract candidate patterns
@@ -83,7 +84,7 @@
          (let ((support (compute-support candidate atomspace)))
            (when (>= support (miner-min-support miner))
              (let ((pattern (make-pattern candidate support 0.0 1
-                                        (list 'discovered (current-time)))))
+                                        (list 'discovered discovery-time))))
                (hash-table-set! (miner-patterns miner)
                               (pattern-key candidate)
                               pattern)
@@ -99,7 +100,7 @@
 (define (compute-support pattern atomspace)
   "Compute the support (frequency) of a pattern in the AtomSpace."
   ;; Placeholder - would count occurrences in actual AtomSpace
-  (+ 0.5 (* 0.5 (random:uniform))))
+  (+ 0.5 (* 0.5 (random 1.0))))
 
 (define (generate-candidates atomspace predicate)
   "Generate candidate patterns from AtomSpace."
@@ -204,7 +205,7 @@
 
 (define (select-action engine state available-actions)
   "Select action using epsilon-greedy policy."
-  (if (< (random:uniform) (rl-epsilon engine))
+  (if (< (random 1.0) (rl-epsilon engine))
       ;; Explore: random action
       (list-ref available-actions (random (length available-actions)))
       ;; Exploit: best action
