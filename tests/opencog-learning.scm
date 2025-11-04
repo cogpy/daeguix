@@ -18,8 +18,7 @@
 
 (define-module (test-opencog-learning)
   #:use-module (gnu opencog learning)
-  #:use-module (srfi srfi-64)
-  #:use-module (ice-9 match))
+  #:use-module (srfi srfi-64))
 
 (test-begin "opencog-learning")
 

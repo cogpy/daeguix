@@ -18,8 +18,7 @@
 
 (define-module (test-opencog-daemons)
   #:use-module (gnu opencog daemons)
-  #:use-module (srfi srfi-64)
-  #:use-module (ice-9 match))
+  #:use-module (srfi srfi-64))
 
 (test-begin "opencog-daemons")
 

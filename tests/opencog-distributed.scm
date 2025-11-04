@@ -18,8 +18,7 @@
 
 (define-module (test-opencog-distributed)
   #:use-module (gnu opencog distributed)
-  #:use-module (srfi srfi-64)
-  #:use-module (ice-9 match))
+  #:use-module (srfi srfi-64))
 
 (test-begin "opencog-distributed")
 
